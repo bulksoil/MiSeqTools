@@ -14,7 +14,7 @@
 use strict;
 use warnings;
 
-my ($group, $fq) = @ARGV;														# Grab the group file and and fastq file from the command line, order is important
+my ($group, $fq, $pipeline) = @ARGV;														# Grab the group file and and fastq file from the command line, order is important
 
 open GROUP, "$group" or die "Cannot open group file: $group\n";
 open FQ, "$fq" or die "Cannot open fastq file: $fq\n";
@@ -38,7 +38,13 @@ while (my $header = <FQ>) {
 	my $samp = $bcs{$header};
 	my $samp1 = $samp . "_" . $count;
 	$header =~ s/@//;
-	print ">$samp1\t$header\torig_bc=$seqs{$samp}\tnew_bc=$seqs{$samp}\tbc_diffs=0\n$seq\n";
+	if ($pipeline eq "qiime") {
+		print ">$samp1\t$header\torig_bc=$seqs{$samp}\tnew_bc=$seqs{$samp}\tbc_diffs=0\n$seq\n";
+	} elsif ($pipeline eq "med") {
+		print ">$samp\n$seq\n";
+	} else {
+		die "Can't recognize pipeline $pipeline\n";
+	}
 	$count++;
 	warn "Found $count so far\n" if ($count % 10000 == 0);
 }	

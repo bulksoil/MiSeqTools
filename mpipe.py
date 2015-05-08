@@ -13,7 +13,8 @@ parser.add_option('--read1', dest = "read1", action = "store", default = "R1.fq"
 parser.add_option('--read2', dest = "read2", action = "store", default = "R2.fq")
 parser.add_option('--read3', dest = "read3", action = "store", default = "R3.fq")
 parser.add_option('--read4', dest = "read4", action = "store", default = "R4.fq")
-parser.add_option('--max_length', dest = "max_length", action = "store", type = "int", default = 275)
+parser.add_option('--max_length', dest = "max_length", action = "store", type = "int", default = 260)
+parser.add_option('--method', dest = "method", action = "store", default = "qiime")
 
 options, args = parser.parse_args()
 
@@ -23,6 +24,7 @@ read4 = options.read4
 mapFile = options.map
 prefix = options.prefix + "_"
 max_length = options.max_length
+method = options.method
 if options.bc:
 	barcodeFile = options.bc
 else:
@@ -79,7 +81,7 @@ os.system(group_order_arg)
 
 ## Convert contigs file to FASTA
 fa_convert_out = re.sub('\.fq*', '.fa', ps_out_fq)
-fa_convert_arg = 'fa_assemble_from_group.pl ' + group_order_out + ' ' + ps_out_fq + ' > ' + fa_convert_out
+fa_convert_arg = 'fa_assemble_from_group.pl ' + group_order_out + ' ' + ps_out_fq + method ' > ' + fa_convert_out
 print '[STATUS] Executing argument "' + fa_convert_arg + '"'
 print 'Writing results to ' + fa_convert_out
 os.system(fa_convert_arg)
@@ -91,6 +93,10 @@ print '[STATUS] Executing argument "' + clean_up_arg + '"'
 print 'Writing results to ' + final_seqs
 os.system(clean_up_arg)
 
+## Put gaps on the ends of the sequences if the med pipeline is specified
+if method == "med":
+	gapped_seqs = prefix + 'seqs_gapped.fa'
+	gap_arg = 'o-pad-with-gaps -o ' + gapped_seqs + final_seqs
 
 
 	
